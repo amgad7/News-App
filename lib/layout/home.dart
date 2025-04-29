@@ -43,6 +43,7 @@ class _HomeScreensState extends State<HomeScreens> {
                   fontSize: 35,
                   fontWeight: FontWeight.bold,
                   color: Colors.white),
+
             ),
             backgroundColor: Colors.green,
             actions: [
