@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/screens/bloc/cubit.dart';
 import 'package:news_app/screens/bloc/states.dart';
 import 'package:news_app/screens/news_tab.dart';
+import 'package:news_app/screens/repo/local_dto.dart';
+import 'package:news_app/screens/repo/remote_dto.dart';
 
 import '../shared/network/remote/api_manager.dart';
 
@@ -13,7 +15,7 @@ class DataTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeCubit()..getSources(categoryId),
+      create: (context) => HomeCubit(HomeRemoteDs())..getSources(categoryId),
       child: BlocConsumer<HomeCubit, HomeStates>(
         listener: (context, state) {
           if (state is HomeGetSourcesLoadingState) {
@@ -25,7 +27,8 @@ class DataTab extends StatelessWidget {
                 );
               },
             );
-          } else if (state is HomeGetSourcesSuccessState || state is changeSelectedSourse) {
+          } else if (state is HomeGetSourcesSuccessState ||
+              state is changeSelectedSourse) {
             HomeCubit.get(context).getNewsData();
           }
         },

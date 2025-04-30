@@ -3,18 +3,18 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:news_app/screens/bloc/states.dart';
+import 'package:news_app/screens/repo/home_repo.dart';
 
 import '../../models/NewsDataModel.dart';
 import '../../models/SourcesResponse.dart';
-import '../../shared/components/constant.dart';
-import '../../shared/network/remote/end_points.dart';
-import '../../shared/styles/app_string.dart';
 
 class HomeCubit extends Cubit<HomeStates> {
+  HomeRepo repo;
+
+  HomeCubit(this.repo) : super(HomeInitState());
   static HomeCubit get(context) => BlocProvider.of(context);
-  HomeCubit() : super(HomeInitState());
   List<Sources> sources = [];
   List<Articles> articles = [];
   int selectedIndex = 0;
@@ -27,13 +27,7 @@ class HomeCubit extends Cubit<HomeStates> {
   Future<void> getSources(String categoryId) async {
     emit(HomeGetSourcesLoadingState());
     try {
-      Uri url = Uri.https(Constant.BASE_URL, EndPoints.sources, {
-        AppString.apiKey: Constant.APY_KEY_VALUE,
-        "category": categoryId
-      });
-      http.Response response = await http.get(url);
-      var json = jsonDecode(response.body);
-      SourcesResponse sourcesResponse = SourcesResponse.fromJson(json);
+      var sourcesResponse = await repo.getSources(categoryId);
       sources = sourcesResponse.sources ?? [];
       emit(HomeGetSourcesSuccessState());
     } catch (e) {
@@ -44,11 +38,8 @@ class HomeCubit extends Cubit<HomeStates> {
   Future<void> getNewsData() async {
     try {
       emit(HomeGetNewsLoadingState());
-      Uri url = Uri.https(Constant.BASE_URL, EndPoints.newsData,
-          {AppString.apiKey: Constant.APY_KEY_VALUE, "sources": sources[selectedIndex].id});
-      http.Response response = await http.get(url);
-      var json = jsonDecode(response.body);
-      NewsDataModel newsDataModel = NewsDataModel.fromJson(json);
+      var newsDataModel =
+          await repo.getNewsData(sources[selectedIndex].id ?? "");
       articles = newsDataModel.articles ?? [];
       emit(HomeGetNewsSuccessState());
     } catch (e) {
